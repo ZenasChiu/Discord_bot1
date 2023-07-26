@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+import math
 from datetime import datetime, date
 import yfinance as yf
 import pandas_datareader as pdr
@@ -60,60 +61,48 @@ def getSell_Statement(inp,sell_P,record,num,required_date):
 #	--> win = x % (adjustment)
 #	--> loss = 10 days above(each loss , average loss) --> mainpoint how cut loss
 #	--> Total gain / Loss 
+def getamount(price, budget):
+    return math.floor(budget/price)
+
+def getGainLoss(inP,outP):
+    return inP - outP
 
 
  # simulate the winRate in coming days (can sell out or not) By history
-def getwinRate(record, num):
+def getwinRate(record, num,amount):
     sell_flag = False
     sell_RequireDays = 1
     #sell_statement=""
     inP = record.Close[num]
-    targetP = inP * 1.01
+    targetP = inP * 1.03        #earning {3}%
+
     while(sell_flag == False):
-        if(sell_RequireDays < 10):
-            #print(f"{inP}  : {targetP}")
-            next_data = num+sell_RequireDays
-            if(next_data < len(record)):
-                if(getdailyGL(record,num)):
-                    if(targetP < record.Close[next_data]):
-                        sell_P = record.Close[next_data]
-                        #print("win")
-                        #print(f"{targetP} vs {sell_P}")
-                        #sell_statement += f"{getSell_Statement(inP,sell_P,record,num,sell_RequireDays)}"
-                        print( f"Win :{getSell_Statement(inP,sell_P,record,num,sell_RequireDays)}")
-                        sell_flag = True
-                        print("1")
-                        return True
+        next_data = num + sell_RequireDays
 
-                else:
-                    if(targetP < record.Open[next_data]):
-                        sell_P = record.Open[next_data]
-                        #print(f"{targetP} vs {sell_P}")
-                        #print("win")
-                        #sell_statement += f"{getSell_Statement(inP,sell_P,record,num,sell_RequireDays)}"
-                        print( f"Win :{getSell_Statement(inP,sell_P,record,num,sell_RequireDays)}")
-                        sell_flag = True
-                        print("2")
-                        return True
-                sell_RequireDays+=1
-            else:
-                #print("Loss")
-                #sell_statement += f"Loss :{getSell_Statement(inP,sell_P,record,num,sell_RequireDays)}"
-                print( f"Not yet sell")
-                sell_flag = True
-                print("5")
-                return False
-
-        elif(sell_RequireDays >= 10):
-            sell_P = record.Close[next_data]
-            #print("Loss")
-            #sell_statement += f"Loss :{getSell_Statement(inP,sell_P,record,num,sell_RequireDays)}"
-            print( f"Loss :{getSell_Statement(inP,sell_P,record,num,sell_RequireDays)}")
-            sell_flag = True
-            print("4")
-            return False
+        if(next_data < len(record)): #Break while it arrive TODAY()
     
-    #return sell_statement
+            if(getdailyGL(record,num)): #Depend the highest point and find can i sell the stock
+                if(targetP < record.Close[next_data]):  #if daily raising
+                    earning = targetP * amount
+                    sell_flag = True
+                    return True,earning
+                
+            else:
+                if(targetP < record.Open[next_data]):   #if day is droping
+                    earning = targetP * amount
+                    sell_flag = True
+                    return True, earning 
+                
+                elif(comparerP(inP,record.Close[next_data]) < -3): # stop loss in 4 % # stop loss need to depends on what type of stock
+                    sell_P = inP*0.97
+                    earning = sell_P * amount
+                    sell_flag = True
+                    return False ,earning
+            sell_RequireDays+=1
+        else:
+            earning = record.Close[num-1]*amount
+            sell_flag = True
+            return False, earning
 
 #Get the daily {?}MA number
 def getSMA(current,record,average): 
@@ -204,32 +193,44 @@ def getRecordInf(record, num):
 
 #[OutFunciton] [testing]
 #Getting the cross by comparing MA and Volume where show win rate also
-def get_cross_data(stock_ID, aMA, bMA):
+def get_cross_data(stock_ID, aMA, bMA,butget):
     record = get_stock_record(stock_ID,"1y","1d")
     inList = comparing_MA(record,aMA,bMA)
     AV = getAverageV(record)
     countLarge = 0
     countsmall = 0
     normal_winrate = 0
+    earning = butget
     #print(inList)
-    print(f"Total : {len(inList)} : {inList}")
+    print(f"Total : {len(inList)} : {inList} ")
     for i in inList:
-        if(getwinRate(record,i)):
+        amount = getamount(record.Close[i], earning)
+        #print(f"{amount} / {earning}")
+        win, earning = getwinRate(record,i,amount)
+        print(f"new {earning}")
+
+        if(win):
             normal_winrate +=1
 
         if( getAveragePeriod(i, record,aMA) > AV):
             #if( getAveragePeriod(i, record,bMA) > AV):
-            if(getwinRate(record,i)):
+            if(win):
+
                 countLarge +=1
 
         if( getAveragePeriod(i, record,aMA) < AV):
             #if( getAveragePeriod(i, record,bMA) < AV):
-            if(getwinRate(record,i)):
+            if(win):
                 countsmall +=1
             
             #checklist.append(f"{getRecordInf(record,i) + Volume}")
-    
-    print(f"\nif count volume larger {countLarge}: {countLarge/len(inList)*100}\nif count volume smaller {countsmall} : {countsmall/len(inList)*100}\n Normal winRate {normal_winrate} : {normal_winrate/len(inList)*100}")
+    VL = "%.2f" % (countLarge/len(inList)*100)
+    VS = "%.2f" % (countsmall/len(inList)*100)
+    Nor = "%.2f" % (normal_winrate/len(inList)*100)
+    gainLoss = "%.2f" % ((earning-butget)/butget*100)
+
+    #print(test result)
+    print(f"Total change ${earning} : {gainLoss}% \nif count volume larger {countLarge}: {VL}%\nif count volume smaller {countsmall} : {VS}%\nNormal winRate {normal_winrate} : {Nor} %")
  
     return inList
 
@@ -240,6 +241,6 @@ def get_cross_data(stock_ID, aMA, bMA):
 
 
 def main():
-    print(get_cross_data("intc", 5, 10))
+    print(get_cross_data("T", 5, 10,2000))
 
 main()
