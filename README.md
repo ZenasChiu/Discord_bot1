@@ -58,10 +58,9 @@ Enjoy
 
 
 ## My notes
-MA : 
+MA : [Website](https://www.investopedia.com/terms/m/movingaverage.asp)
     range : x days 
     today to before x days average
-
 
 RSI : 
 Refer : [Website](https://www.wallstreetmojo.com/relative-strength-index/)
@@ -86,7 +85,7 @@ Refer : [Website](https://www.wallstreetmojo.com/relative-strength-index/)
 
     This can be used on check buy or not 
         where if number is over the range ( where not allow the trade )
-        
+
 ATR :              
 Refer : [website](https://www.investopedia.com/terms/a/atr.asp)
     range : x days -1 
@@ -119,22 +118,7 @@ Refer : [website](https://www.investopedia.com/terms/a/atr.asp)
 
     ATR = (P_ATR * (range - 1) * (yesterday_TR) / range) 
 
-    --> where the value can be used in today where set the range (count as winRate) where cut lost 
-
-
-    put into ATR
-
-    a.High 
-    a.low
-    c.close
-    
 
 
 
-High 
-
-Low
-
-Close Yesterday
-
-14 days as 
+  
