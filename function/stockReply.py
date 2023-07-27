@@ -200,18 +200,11 @@ def simlation(record, num, next_num, amount):
     sell_flag = False
     sell_RequireDays = 1
     inP = record.Close[num]
-    aTR = getATR(record, num,14)
 
     #------------------------------------------------------------------------------------#
     #-----------------------------Please change you risk Here----------------------------#
     #------------------------------------------------------------------------------------#
     #Set Risk dependent on stock can adjust the risk level of 
-    if(aTR > inP * 1.03):
-        targetP = inP + aTR
-        losevalue = inP - aTR*1.3
-    else:
-        targetP = inP * 1.03
-        losevalue = inP * 0.97
     #------------------------------------------------------------------------------------#
     #------------------------------------------------------------------------------------#
     #------------------------------------------------------------------------------------#
@@ -220,15 +213,24 @@ def simlation(record, num, next_num, amount):
         next_data = num + sell_RequireDays
         if(next_data < len(record)):
             if(next_data < next_num ):
+                rsi = getRSI(record, next_data,14)
+                targetP = inP *1.1
+                losevalue = 0
                 #-------------------------------------------------#
                 # Holding time management
                 #-------------------------------------------------#
-                if(sell_RequireDays >= 5):
+                if(rsi >= 70 or rsi <= 30):
                     targetP = inP + getATR(record, next_data,14)*0.5
-                    losevalue = inP - getATR(record, next_data,14)
-                if(sell_RequireDays >= 10):
-                    targetP = inP + getATR(record, next_data,14)*0.1
-                    losevalue = inP - getATR(record, next_data,14)
+                    losevalue = inP *0.95
+                else:
+                   if(sell_RequireDays > 5):
+                       targetP = inP + getATR(record, next_data,14)*0.3
+                       losevalue = inP * 0.98
+                   else:
+                       targetP = inP * 1.05
+                       losevalue = inP * 0.97
+
+                    #losevalue = inP - getATR(record, next_data,14)
                 #-------------------------------------------------#
 
                 if(sellable(targetP,record,next_data)):
@@ -296,9 +298,7 @@ def get_cross_data(stock_ID, aMA, bMA,butget):
     for i in range(len(inList)-1):
         earning = earning + leave
         amount,leave = getamount(record.Close[inList[i]], earning)
-        #print(f"{amount} / {earning}")
         win, earning = simlation(record,inList[i],inList[i+1],amount)
-        #print(f"{inList[i]} : new {earning}")
         if(win):
             normal_winrate +=1
             if( getAveragePeriod(inList[i], record,aMA) > AV):
@@ -308,6 +308,7 @@ def get_cross_data(stock_ID, aMA, bMA,butget):
         else:
             lose += 1
 
+    #earningA = (earning+leave-butget-200*(len(inList)-1))
     VL = "%.2f" % (countLarge/(len(inList)-1)*100)
     VS = "%.2f" % (countsmall/(len(inList)-1)*100)
     Nor = "%.2f" % (normal_winrate/(len(inList)-1)*100)
@@ -324,11 +325,11 @@ def get_stock_record(stock_ID,period,interval):
     return a 
 
 def main():
-    StockID = "aapl"
+    StockID = "tsla"
     # Please aMA should be smaller than bMA
     aMA = 5
-    bMA = 10
-    Budget = 2000
+    bMA = 20
+    Budget = 10000
 
     print(f"{StockID} Simlation of using {aMA}MA compare {bMA}MA")
     print(get_cross_data(StockID, aMA, bMA,Budget))

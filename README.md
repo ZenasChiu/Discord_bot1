@@ -67,25 +67,21 @@ main()
     #Adjust your data set "get_stock_record(stock_ID,{period},{intervals})"
 ```
 
-##### In line 205 Adjust the Target Price (cut profit) and losevalue (cut lose line) 
-```
-    if(aTR > inP * 1.03):
-        targetP = inP + aTR
-        losevalue = inP - aTR*1.3
-    else:
-        targetP = inP * 1.03
-        losevalue = inP * 0.97
-```
 
 ##### In line 226 Re-Adjust the cuts
 ###### where can increase the selling chance due with the holding time
 ```
-if(sell_RequireDays >= 5):
-    targetP = inP + getATR(record, next_data,14)*0.5
-    losevalue = inP - getATR(record, next_data,14)
-if(sell_RequireDays >= 10):
-    targetP = inP + getATR(record, next_data,14)*0.1
-    losevalue = inP - getATR(record, next_data,14)
+ if(rsi >= 70 or rsi <= 30):
+                    targetP = inP + getATR(record, next_data,14)*0.5
+                    losevalue = inP *0.95
+                else:
+                   if(sell_RequireDays > 5):
+                       targetP = inP + getATR(record, next_data,14)*0.3
+                       losevalue = inP * 0.98
+                   else:
+                       targetP = inP * 1.05
+                       losevalue = inP * 0.97
+
 ```
 
 ##### Result in Terminal
@@ -132,6 +128,9 @@ Normal winRate 22 : 78.57 %
 
 
 ## My notes
+Oh yeah https://gooptions.cc/rsi%E6%8C%87%E6%A8%99/ 
+
+
 MA : [Website](https://www.investopedia.com/terms/m/movingaverage.asp)
     range : x days 
     today to before x days average
