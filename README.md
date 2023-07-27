@@ -43,10 +43,12 @@ def main():
 
 main()
 ```
+```
 > Total change $2048.1499738693237 : 2.41%
 > if count volume larger 4: 30.77%
 > if count volume smaller 2 : 15.38%
 > Normal winRate 6 : 46.15 %
 > [14, 51, 59, 85, 87, 95, 108, 125, 142, 164, 217, 233, 249]
+```
 
 It should return something like this in Terminal 
