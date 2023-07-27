@@ -56,3 +56,85 @@ And there are lots of notes in the code
 Just read those and find me anythime 
 Enjoy
 
+
+## My notes
+MA : 
+    range : x days 
+    today to before x days average
+
+
+RSI : 
+Refer : [Website](https://www.wallstreetmojo.com/relative-strength-index/)
+    range : x days
+        ```
+            [ 1, 2, 3, 4, 5]
+              a  b
+                 a  b
+                    a  b
+                       a  b
+        ```
+    where adding all close comparing the 
+    a : num             <-----today
+    b : num + 1         <-----Tomorrow
+    loop range :
+        --> a - b = - = adding lose
+        --> a - b = + = adding gain
+    lose/range
+    gain/range
+
+    RSI = 100 - (100 / ( 1 + (gain/lose) ) ) 
+
+    This can be used on check buy or not 
+        where if number is over the range ( where not allow the trade )
+        
+ATR :              
+Refer : [website](https://www.investopedia.com/terms/a/atr.asp)
+    range : x days -1 
+        ```
+            [1, 2, 3, 4, 5]
+             c  a
+                c  a
+                   c  a
+                      c  a
+        ```
+    
+    a : num             <-----today
+    c : num - 1         <-----Yesterday
+    where getting :
+    Find TR daily 
+   
+    - array of TR : []
+    - a.High 
+    - a.Low
+    - c.Close
+    H-L  : a.High - a.Low
+    H-Cp : a.High - c .Close
+    L-Cp : a.Low - c.Close
+    if( < range - 1 )
+        TR.appead(Max(H-L,H-Cp,L-Cp))
+    else ( = yesterday_TR)
+
+
+    P_ATR = sum(TR)/len(TR)
+
+    ATR = (P_ATR * (range - 1) * (yesterday_TR) / range) 
+
+    --> where the value can be used in today where set the range (count as winRate) where cut lost 
+
+
+    put into ATR
+
+    a.High 
+    a.low
+    c.close
+    
+
+
+
+High 
+
+Low
+
+Close Yesterday
+
+14 days as 
