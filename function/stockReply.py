@@ -4,21 +4,21 @@ from datetime import datetime, date
 import yfinance as yf
 import pandas_datareader as pdr
 #https://pythonviz.com/finance/yfinance-download-stock-data/
-#{Index}             Open          High           Low         Close     Adj Close       Volume <------ Column Name
+#{Index}             Open          High           Low         Close     Adj Close       Volume          <------ Column Name
 #Date
 #2022-07-26  21361.121094  21361.121094  20776.816406  21239.753906  21239.753906  28624673855
 #2022-07-27  21244.169922  22986.529297  21070.806641  22930.548828  22930.548828  31758955233
 #2022-07-28  22933.640625  24110.470703  22722.265625  23843.886719  23843.886719  40212386158
 #2022-07-29  23845.212891  24294.787109  23481.173828  23804.632812  23804.632812  35887249746
 #2022-07-30  23796.818359  24572.580078  23580.507812  23656.207031  23656.207031  28148218301
+
 #getting Date = record.index
 #getting other elements = record.{Column Name}
-
 
 # Download the record from yahoo finance by the yfinance API
 def get_stock_record(stock_ID,period,interval): 
     a = yf.download(stock_ID,period=period,interval=interval)
-    #print(a)
+    #print(a)                                                   # <----------------------------------------- if you want to doing some test 
     return a 
 
 #Find the Highest point in the period
@@ -83,17 +83,20 @@ def getwinRate(record, num,next_num,amount):
         
                 if(getdailyGL(record,num)): #Depend the highest point and find can i sell the stock
                     if(targetP < record.Close[next_data]):  #if daily raising
+                        print("")
                         earning = targetP * amount
                         sell_flag = True
                         return True,earning
                     
                 else:
                     if(targetP < record.Open[next_data]):   #if day is droping
+                        print("")
                         earning = targetP * amount
                         sell_flag = True
                         return True, earning 
                     
                     elif(comparerP(inP,record.Close[next_data]) < -3): # stop loss in 4 % # stop loss need to depends on what type of stock
+                        print("The price have reach cut lose point")
                         sell_P = inP*0.97
                         earning = sell_P * amount
                         sell_flag = True
@@ -101,10 +104,12 @@ def getwinRate(record, num,next_num,amount):
                 sell_RequireDays+=1
             else:
                 earning = record.Close[num-1]*amount #not yet sell
+                print("The sell reach today PLease wait")
                 sell_flag = True
                 return False, earning
         else:
                 earning = record.Close[num-1]*amount #not yet sell
+                print("The sell is can't reach from last cross")
                 sell_flag = True
                 return False, earning
         
