@@ -119,6 +119,12 @@ Refer : [website](https://www.investopedia.com/terms/a/atr.asp)
     ATR = (P_ATR * (range - 1) * (yesterday_TR) / range) 
 
 
+#Data from yahoo finance where is 
+    #Not real time
 
+#Similation tool for testing your tactics
 
+#There are some relationship find
+#Changing MA should also change Time Holding risk
+#Change Risk need to depend on the 基本面 of stock
   
