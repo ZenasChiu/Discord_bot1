@@ -69,41 +69,45 @@ def getGainLoss(inP,outP):
 
 
  # simulate the winRate in coming days (can sell out or not) By history
-def getwinRate(record, num,amount):
+def getwinRate(record, num,next_num,amount):
     sell_flag = False
     sell_RequireDays = 1
     #sell_statement=""
     inP = record.Close[num]
-    targetP = inP * 1.03        #earning {3}%
+    targetP = inP * 1.04        #earning {3}%
 
     while(sell_flag == False):
         next_data = num + sell_RequireDays
-
-        if(next_data < len(record)): #Break while it arrive TODAY()
-    
-            if(getdailyGL(record,num)): #Depend the highest point and find can i sell the stock
-                if(targetP < record.Close[next_data]):  #if daily raising
-                    earning = targetP * amount
-                    sell_flag = True
-                    return True,earning
-                
+        if(next_data < next_num):
+            if(next_data < len(record)): #Break while it arrive TODAY()
+        
+                if(getdailyGL(record,num)): #Depend the highest point and find can i sell the stock
+                    if(targetP < record.Close[next_data]):  #if daily raising
+                        earning = targetP * amount
+                        sell_flag = True
+                        return True,earning
+                    
+                else:
+                    if(targetP < record.Open[next_data]):   #if day is droping
+                        earning = targetP * amount
+                        sell_flag = True
+                        return True, earning 
+                    
+                    elif(comparerP(inP,record.Close[next_data]) < -3): # stop loss in 4 % # stop loss need to depends on what type of stock
+                        sell_P = inP*0.97
+                        earning = sell_P * amount
+                        sell_flag = True
+                        return False ,earning
+                sell_RequireDays+=1
             else:
-                if(targetP < record.Open[next_data]):   #if day is droping
-                    earning = targetP * amount
-                    sell_flag = True
-                    return True, earning 
-                
-                elif(comparerP(inP,record.Close[next_data]) < -3): # stop loss in 4 % # stop loss need to depends on what type of stock
-                    sell_P = inP*0.97
-                    earning = sell_P * amount
-                    sell_flag = True
-                    return False ,earning
-            sell_RequireDays+=1
+                earning = record.Close[num-1]*amount #not yet sell
+                sell_flag = True
+                return False, earning
         else:
-            earning = record.Close[num-1]*amount
-            sell_flag = True
-            return False, earning
-
+                earning = record.Close[num-1]*amount #not yet sell
+                sell_flag = True
+                return False, earning
+        
 #Get the daily {?}MA number
 def getSMA(current,record,average): 
     sum = 0
@@ -203,22 +207,23 @@ def get_cross_data(stock_ID, aMA, bMA,butget):
     earning = butget
     #print(inList)
     print(f"Total : {len(inList)} : {inList} ")
-    for i in inList:
-        amount = getamount(record.Close[i], earning)
+    inList.append(len(record)+1)
+    for i in range(len(inList)-1):
+        amount = getamount(record.Close[inList[i]], earning)
         #print(f"{amount} / {earning}")
-        win, earning = getwinRate(record,i,amount)
-        print(f"new {earning}")
+        win, earning = getwinRate(record,inList[i],inList[i+1],amount)
+        print(f"{inList[i]} : new {earning}")
 
         if(win):
             normal_winrate +=1
 
-        if( getAveragePeriod(i, record,aMA) > AV):
+        if( getAveragePeriod(inList[i], record,aMA) > AV):
             #if( getAveragePeriod(i, record,bMA) > AV):
             if(win):
 
                 countLarge +=1
 
-        if( getAveragePeriod(i, record,aMA) < AV):
+        if( getAveragePeriod(inList[i], record,aMA) < AV):
             #if( getAveragePeriod(i, record,bMA) < AV):
             if(win):
                 countsmall +=1
