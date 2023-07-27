@@ -5,7 +5,7 @@ from discord.ext import commands
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix = "$", intents = intents)
-token = "OTYwODMzMjQ5MzQ3Nzk2OTky.Gyyt9y.g4cc-F7Zm0lnx5zE7QqaLEP7bjF3Qzk4YFPpio"
+token = ""
 
 # 當機器人完成啟動時
 @bot.event

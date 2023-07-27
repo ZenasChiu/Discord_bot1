@@ -29,7 +29,7 @@ from discord.ext import commands
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix = "$", intents = intents)
-token = "OTYwODMzMjQ5MzQ3Nzk2OTky.Gyyt9y.g4cc-F7Zm0lnx5zE7QqaLEP7bjF3Qzk4YFPpio" <------------------------------- change to your token
+token = "haha" <------------------------------- change to your token
 
 ```
 ##### Learn from https://hackmd.io/@smallshawn95/python_discord_bot_base 
@@ -50,5 +50,9 @@ main()
 > Normal winRate 6 : 46.15 %
 > [14, 51, 59, 85, 87, 95, 108, 125, 142, 164, 217, 233, 249]
 ```
-
 It should return something like this in Terminal 
+
+And there are lots of notes in the code
+Just read those and find me anythime 
+Enjoy
+
