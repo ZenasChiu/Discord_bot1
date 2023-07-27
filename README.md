@@ -6,6 +6,7 @@ pip install regex
 pip install yfinance
 
 ## Application Structure :
+```
 Bot 
     --> Main 
         <--> classes.py as(memory)
@@ -16,7 +17,7 @@ Bot
         <--> classes.py as(memory)
     --> task
         <--> classes.py as(memory)
-
+```
 
 ## User Guide:
 Running --> bot.py as a hold of discordbot *( where change your token )*
