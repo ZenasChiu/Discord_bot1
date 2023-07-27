@@ -260,7 +260,7 @@ def simlation(record, num, next_num, amount):
 #Getting the cross by comparing MA and Volume where show win rate also
 def get_cross_data(stock_ID, aMA, bMA,butget):
     #----------------------------------------------------------------#
-    record = get_stock_record(stock_ID,"3mo","1d") 
+    record = get_stock_record(stock_ID,"1y","1d") 
     #period = [
     #        Choice(name = "上一日", value = "1d"),
     #        Choice(name = "一星期", value = "1wk"),
@@ -326,8 +326,8 @@ def get_stock_record(stock_ID,period,interval):
 def main():
     StockID = "aapl"
     # Please aMA should be smaller than bMA
-    aMA = 3
-    bMA = 5
+    aMA = 5
+    bMA = 10
     Budget = 2000
 
     print(f"{StockID} Simlation of using {aMA}MA compare {bMA}MA")
