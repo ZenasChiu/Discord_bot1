@@ -180,12 +180,10 @@ def comparing_MA(record, a_average,b_average):
 #Compare the daily {?}MA vs {?}MA
 def comparing_MA_today(record, a_average,b_average):
     cross = False
-    current_data = 364 - b_average
+    current_data = len(record) - b_average
     if (getSMA(current_data,record,a_average) > getSMA(current_data,record,b_average)):
             cross = True
     return cross
-
-
 
 
 def getSell_Statement(record,num,required_date,price):
@@ -196,10 +194,12 @@ def getSell_Statement(record,num,required_date,price):
 
 
 # simulate the trading in coming days (can sell out or not) By history updated from simlation
-def simlation(record, num, next_num, amount):
+def simlation(record, num, next_num, amount,p_earning_range,cut_lose_1,cut_lose_2,cut_lose_3,rsi_range,atr_range,rsi_getATR_E_range,day_getATR_E_range):
     sell_flag = False
     sell_RequireDays = 1
     inP = record.Close[num]
+    #print("simlation(record, num, next_num, amount,p_earning_range,cut_lose_1,cut_lose_2,cut_lose_3,rsi_range,atr_range,rsi_getATR_E_range,day_getATR_E_range)")
+    #print(f"#simlation(record, {num}, {next_num}, {amount},{p_earning_range},{cut_lose_1},{cut_lose_2},{cut_lose_3},{rsi_range},{atr_range},{rsi_getATR_E_range},{day_getATR_E_range})")
 
     #------------------------------------------------------------------------------------#
     #-----------------------------Please change you risk Here----------------------------#
@@ -213,22 +213,22 @@ def simlation(record, num, next_num, amount):
         next_data = num + sell_RequireDays
         if(next_data < len(record)):
             if(next_data < next_num ):
-                rsi = getRSI(record, next_data,14)
+                rsi = getRSI(record, next_data,rsi_range)
                 targetP = inP *1.1
                 losevalue = 0
                 #-------------------------------------------------#
                 # Holding time management
                 #-------------------------------------------------#
                 if(rsi >= 70 or rsi <= 30):
-                    targetP = inP + getATR(record, next_data,14)*0.5
-                    losevalue = inP *0.95
+                    targetP = inP + getATR(record, next_data,atr_range)*rsi_getATR_E_range
+                    losevalue = inP *cut_lose_1
                 else:
                    if(sell_RequireDays > 5):
-                       targetP = inP + getATR(record, next_data,14)*0.3
-                       losevalue = inP * 0.98
+                       targetP = inP + getATR(record, next_data,atr_range)*day_getATR_E_range
+                       losevalue = inP * cut_lose_2
                    else:
-                       targetP = inP * 1.05
-                       losevalue = inP * 0.97
+                       targetP = inP * p_earning_range
+                       losevalue = inP * cut_lose_3
 
                     #losevalue = inP - getATR(record, next_data,14)
                 #-------------------------------------------------#
@@ -260,9 +260,13 @@ def simlation(record, num, next_num, amount):
 
 #[OutFunciton] [testing]
 #Getting the cross by comparing MA and Volume where show win rate also
-def get_cross_data(stock_ID, aMA, bMA,butget):
+def get_cross_data(stock_ID, aMA, bMA,budget,period_num,interval_num,p_earning_range,cut_lose_1,cut_lose_2,cut_lose_3,rsi_range,atr_range,rsi_getATR_E_range,day_getATR_E_range):
+    period = ["1d","1wk","1mo","3mo","1y","3y","5y"]
+    #[0:"1d",1:"1wk",2:"1mo",3: "3mo",4: "1y",5: "3y",6: "5y"]
+    intervals = ["1m","2m","5m","15m","60m","90m","1d","1wk","3mo"]
+    #[0: "1m",1: "2m",2: "5m",3: "15m",4: "60m",5: "90m",6: "1d",7: "1wk",8: "3mo"]
     #----------------------------------------------------------------#
-    record = get_stock_record(stock_ID,"1y","1d") 
+    record = get_stock_record(stock_ID,period[period_num],intervals[interval_num]) 
     #period = [
     #        Choice(name = "上一日", value = "1d"),
     #        Choice(name = "一星期", value = "1wk"),
@@ -290,7 +294,7 @@ def get_cross_data(stock_ID, aMA, bMA,butget):
     countsmall = 0
     normal_winrate = 0
     lose =0
-    earning = butget
+    earning = budget
     leave = 0
 
     print(f"Total : {len(inList)} : {inList} ")
@@ -298,7 +302,8 @@ def get_cross_data(stock_ID, aMA, bMA,butget):
     for i in range(len(inList)-1):
         earning = earning + leave
         amount,leave = getamount(record.Close[inList[i]], earning)
-        win, earning = simlation(record,inList[i],inList[i+1],amount)
+        
+        win, earning = simlation(record,inList[i],inList[i+1],amount,p_earning_range,cut_lose_1,cut_lose_2,cut_lose_3,rsi_range,atr_range,rsi_getATR_E_range,day_getATR_E_range)
         if(win):
             normal_winrate +=1
             if( getAveragePeriod(inList[i], record,aMA) > AV):
@@ -312,11 +317,13 @@ def get_cross_data(stock_ID, aMA, bMA,butget):
     VL = "%.2f" % (countLarge/(len(inList)-1)*100)
     VS = "%.2f" % (countsmall/(len(inList)-1)*100)
     Nor = "%.2f" % (normal_winrate/(len(inList)-1)*100)
-    gainLoss = "%.2f" % ((earning+leave-butget)/butget*100)
-    
+    total_change = (earning+leave-budget)/budget*100
+    gainLoss = "%.2f" % (total_change)
+
     print(f"Total change ${earning+leave} : {gainLoss}% \nVolume larger {countLarge}: {VL}%\nVolume smaller {countsmall} : {VS}%\nNormal winRate {normal_winrate} : {Nor} %")
  
-    return inList[:-1]
+    print(total_change)
+    return total_change
 
 # Download the record from yahoo finance by the yfinance API
 def get_stock_record(stock_ID,period,interval): 
@@ -325,14 +332,27 @@ def get_stock_record(stock_ID,period,interval):
     return a 
 
 def main():
-    StockID = "tsla"
+    stock_ID = "aapl"
     # Please aMA should be smaller than bMA
     aMA = 5
     bMA = 20
-    Budget = 10000
+    budget = 10000
+    period_num = 4
+    #[0:"1d",1:"1wk",2:"1mo",3: "3mo",4: "1y",5: "3y",6: "5y"]
+    interval_num = 4
+     #[0: "1m",1: "2m",2: "5m",3: "15m",4: "60m",5: "90m",6: "1d",7: "1wk",8: "3mo"]
+    rsi_range= 14
+    atr_range = 14
+    rsi_getATR_E_range= 1
+    day_getATR_E_range= 0.7
+    p_earning_range = 1.03
+    cut_lose_1 = 0.975
+    cut_lose_2 = 0.975
+    cut_lose_3 = 0.975
 
-    print(f"{StockID} Simlation of using {aMA}MA compare {bMA}MA")
-    print(get_cross_data(StockID, aMA, bMA,Budget))
+    print(f"{stock_ID} Simlation of using {aMA}MA compare {bMA}MA")
+    #get_cross_data(stock_ID, aMA, bMA,budget,period_num,interval_num,p_earning_range,cut_lose_1,cut_lose_2,cut_lose_3,rsi_range,atr_range,rsi_getATR_E_range,day_getATR_E_range)
+    get_cross_data(stock_ID, aMA, bMA, budget,period_num,interval_num,p_earning_range,cut_lose_1,cut_lose_2,cut_lose_3,rsi_range,atr_range,rsi_getATR_E_range,day_getATR_E_range)
 
 main()
 
